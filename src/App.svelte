@@ -11,18 +11,24 @@
 		const startYear = dayjs(d).startOf("year");
 		return dayjs(d).diff(startYear, "days") + 1;
 	}
+	$: repStart = toRep(date);
 	$: repCount = {
-		start: toRep(date),
-		day: (toRep(date) % 30) + 1,
-		month: (toRep(date) - (toRep(date) % 30)) / 30,
-		season: (toRep(date) - (toRep(date) % 90)) / 90,
-		decade: (toRep(date) - (toRep(date) % 120)) / 120,
+		start: repStart,
+		day: repStart % 30 || 30,
+		decade: ((repStart % 30) - ((repStart % 30) % 10)) / 10,
+		month: (repStart - (repStart % 30)) / 30,
+		season: (repStart - (repStart % 90)) / 90,
 	};
-	function toGreg(d: number) {
-		return dayjs(d).startOf("year").add(d, "days").toISOString().split("T")[0];
+	function setRep(e) {
+		const repStart = e.target.id.split("-")[1];
+		date = dayjs(date)
+			.startOf("year")
+			.add(repStart, "days")
+			.toISOString()
+			.split("T")[0];
 	}
 	function dayCount(day: number, decade: number, monthIndex: number) {
-		return monthIndex * 30 + 10 * decade + day - 1;
+		return monthIndex * 30 + 10 * decade + day;
 	}
 </script>
 
@@ -37,7 +43,7 @@
 		{repCount.day}
 		{months[repCount.month]} -
 		{seasons[repCount.season]},
-		{repCount.decade} décade
+		{repCount.decade + 1} décade
 	</div>
 	<table class="w-full table-auto">
 		<thead>
@@ -61,13 +67,14 @@
 						<td class="border-r border-l border-r-black">{d + 10 * de}</td>
 						{#each months as _, mi}
 							<td
-								id="day-{mi * 30 + 10 * de + d - 1}"
+								id="day-{mi * 30 + 10 * de + d}"
+								on:click={setRep}
 								class="border-r 
 									{!((mi % 3) - 2) ? 'border-r-black' : ''} 
-									{dayCount(d, de, mi) === repCount ? 'bg-blue-400' : ''}
+									{dayCount(d, de, mi) === repCount.start ? 'bg-blue-400' : ''}
 								"
 							>
-								{saints[dayCount(d, de, mi)]}
+								{saints[dayCount(d, de, mi) - 1]}
 							</td>
 						{/each}
 					</tr>
