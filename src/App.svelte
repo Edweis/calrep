@@ -1,27 +1,44 @@
 <script lang="ts">
-	export const seasons = ["Automne", "Hiver", "Printemps", "Été"];
-	export const months = [
-		"Vendémiaire",
-		"Brumaire",
-		"Frimaire",
-		"Nivôse",
-		"Pluviôse",
-		"Ventôse",
-		"Germinal",
-		"Floréal",
-		"Prairial",
-		"Messidor",
-		"Thermidor",
-		"Fructidor",
-	];
+	import dayjs from "dayjs";
+	import seasons from "./data/seasons.json";
+	import months from "./data/months.json";
 	import saints from "./data/saints.json";
-	export const days = new Array(30).fill(null).map((_, i) => i + 1);
+	let [date, time] = ["2022-07-11", "03:54:04.228Z"]; //new Date().toISOString().split("T");
+	export const days = new Array(10).fill(null).map((_, i) => i + 1);
+	export const decades = new Array(3).fill(null).map((_, i) => i);
+
+	function toRep(d: string) {
+		const startYear = dayjs(d).startOf("year");
+		return dayjs(d).diff(startYear, "days") + 1;
+	}
+	$: repCount = {
+		start: toRep(date),
+		day: (toRep(date) % 30) + 1,
+		month: (toRep(date) - (toRep(date) % 30)) / 30,
+		season: (toRep(date) - (toRep(date) % 90)) / 90,
+		decade: (toRep(date) - (toRep(date) % 120)) / 120,
+	};
+	function toGreg(d: number) {
+		return dayjs(d).startOf("year").add(d, "days").toISOString().split("T")[0];
+	}
+	function dayCount(day: number, decade: number, monthIndex: number) {
+		return monthIndex * 30 + 10 * decade + day - 1;
+	}
 </script>
 
 <main class=" mx-auto px-4">
 	<h1 class="text-3xl text-center">Calendrier Républicain</h1>
-
-	<h3 class="text-xl">Année</h3>
+	<div>
+		<label for="date-greg">Date calendrier Grégorien: </label>
+		<input type="date" id="date-greg" bind:value={date} />
+	</div>
+	<div>
+		<label for="date-rep">Date calendrier Républicain: </label>
+		{repCount.day}
+		{months[repCount.month]} -
+		{seasons[repCount.season]},
+		{repCount.decade} décade
+	</div>
 	<table class="w-full table-auto">
 		<thead>
 			<tr class="border-t border-b">
@@ -30,21 +47,32 @@
 					<th class="border-r" colspan="3" scope="colgroup">{s}</th>
 				{/each}
 			</tr>
-			<tr class="border-b">
+			<tr class="border-b border-b-black">
 				<th class="border-r border-l" scope="col" />
 				{#each months as m}
 					<th class="border-r" scope="col">{m}</th>
 				{/each}
 			</tr>
-		</thead><tbody>
-			{#each days as d}
-				<tr class="border-b">
-					<td class="border-r border-l">{d}</td>
-					{#each months as m, mi}
-						<td class="border-r">{saints[mi * 30 + d]}</td>
-					{/each}
-				</tr>
-			{/each}
-		</tbody>
+		</thead>
+		{#each decades as de}
+			<tbody class="">
+				{#each days as d}
+					<tr class="border-b {d === 10 ? 'border-b-black' : ''}">
+						<td class="border-r border-l border-r-black">{d + 10 * de}</td>
+						{#each months as _, mi}
+							<td
+								id="day-{mi * 30 + 10 * de + d - 1}"
+								class="border-r 
+									{!((mi % 3) - 2) ? 'border-r-black' : ''} 
+									{dayCount(d, de, mi) === repCount ? 'bg-blue-400' : ''}
+								"
+							>
+								{saints[dayCount(d, de, mi)]}
+							</td>
+						{/each}
+					</tr>
+				{/each}
+			</tbody>
+		{/each}
 	</table>
 </main>
