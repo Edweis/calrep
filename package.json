@@ -4,10 +4,11 @@
   "private": true,
   "scripts": {
     "build:svelt": "rollup -c",
+    "build:tailwind": "npx tailwindcss -i ./public/global.css -o ./public/build/global.css",
     "dev:svelt": "rollup -c -w",
     "dev:tailwind": "pnpx tailwindcss -i ./public/global.css -o ./public/build/global.css --watch",
     "dev": "concurrently \"pnpm run dev:svelt\"  \"pnpm run dev:tailwind\"",
-    "build": "concurrently \"pnpm run build:svelt\"",
+    "build": "pnpm run build:svelt && pnpm run build:tailwind",
     "start": "sirv public --no-clear",
     "test": "jest",
     "check": "svelte-check --tsconfig ./tsconfig.json"
