@@ -26,8 +26,18 @@
 	}
 </script>
 
-<main class="mx-auto px-4">
+<main class=" px-4">
 	<h1 class="text-3xl text-center">Calendrier Républicain Pratique</h1>
+	<div class="container mx-auto p-4">
+		Ce calendrier est inspiré du <a
+			href="https://fr.wikipedia.org/wiki/Calendrier_r%C3%A9publicain"
+			class="underline hover:text-blue-500">calendrier républicain</a
+		>
+		en imposant le premier jour de l'année au 22 Septembre afin de coïncider avec
+		les années bisextiles du calendrier Grégorien. Ainsi ce calendrier
+		<b>ne correspond pas au calendrier républicain de 1791-1805</b> mais représente
+		une version contemporaine, alternative au calendrier grégorien.
+	</div>
 	<div>
 		<label for="date-greg">Date calendrier Grégorien: </label>
 		<input type="date" id="date-greg" bind:value={date} />
@@ -35,9 +45,10 @@
 	<div>
 		<label for="date-rep">Date calendrier Républicain: </label>
 		{formated.dayPart}
-		An {formated.year} -
-		{formated.season},
-		{formated.decade} décade
+		An {formated.year}
+		{formated.feast
+			? ""
+			: " - " + formated.season + ", " + (formated.decade + 1) + " décade"}
 	</div>
 	<table class="w-full table-auto">
 		<thead>
