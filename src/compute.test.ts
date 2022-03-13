@@ -1,63 +1,45 @@
 import dayjs from "dayjs"
-import { getRepOrigin, isLeapYear, RepDate, toRep } from "./compute"
+import { getRepOrigin, isGregLeap, RepDate, RepDateData, toRep } from "./compute"
+import groupBy from 'lodash/groupBy'
 
 describe('toRep', () => {
-  const cases: Array<[string, RepDate]> = [
-    ['1792-09-22', { feast: false, day: 1, month: 1, year: 1 }],
-    ['1792-09-23', { feast: false, day: 2, month: 1, year: 1 }],
-    ['1792-10-25', { feast: false, day: 5, month: 12, year: 1 }],
-    ['1793-01-01', { feast: false, day: 12, month: 4, year: 1 }],
-    ['1793-02-01', { feast: false, day: 13, month: 5, year: 1 }],
-    ['1793-02-28', { feast: false, day: 10, month: 6, year: 1 }],
-    ['1793-06-19', { feast: false, day: 1, month: 10, year: 1 }],
-    ['1793-09-15', { feast: false, day: 29, month: 12, year: 1 }],
-    ['1793-09-16', { feast: false, day: 30, month: 12, year: 1 }],
-    ['1793-09-17', { feast: true, day: 1, year: 1 }],
-    ['1793-09-18', { feast: true, day: 2, year: 1 }],
-    ['1793-09-19', { feast: true, day: 3, year: 1 }],
-    ['1793-09-20', { feast: true, day: 4, year: 1 }],
-    ['1793-09-21', { feast: true, day: 5, year: 1 }],
-    ['1793-09-22', { feast: false, day: 1, month: 1, year: 2 }],
-    ['1795-09-22', { feast: true, day: 6, year: 3 }],
-    ['1795-09-23', { feast: false, day: 1, month: 1, year: 4 }],
-    ['1795-09-24', { feast: false, day: 2, month: 1, year: 4 }],
-  ]
-  it.each(cases)('%s -> %j', (str, expected) => {
-    expect(toRep(str)).toEqual(expected)
+  const start = dayjs('1800-09-22T00:00:00.001Z')
+  const dates = Array(10000).fill(null).map((_, i) => start.add(i, 'd').toISOString().split('T')[0]).map(toRep).map(r => r.rep)
+  const perYear = Object.values(groupBy(dates, 'year')).slice(0, -1) as RepDateData[][] // we remove last year that is incomplete
+  it('should have years of 365 or 366 days', () => {
+    console.log(perYear.filter(grp => isGregLeap(grp[0].year)).map(g => g.length))
+    expect(perYear.filter(grp => isGregLeap(grp[0].year)).every(grp => grp.length === 366)).toBe(true)
+    expect(perYear.filter(grp => !isGregLeap(grp[0].year)).every(grp => grp.length === 365)).toBe(true)
+  })
+  it('should have 360 not feat days per year', () => {
+    expect(perYear.map(grp => grp.filter(d => d.feast === false).length).every(grp => grp === 360)).toBe(true)
   })
 })
 
 describe('getRepOrigin', () => {
-  const cases: Array<[string, string]> = [
-    ['1792-09-21', '1791-09-23'],
-    ['1792-09-22', '1792-09-22'],
-    ['1792-09-23', '1792-09-22'],
-
-    ['1793-09-21', '1792-09-22'],
-    ['1793-09-22', '1793-09-22'],
-    ['1793-09-23', '1793-09-22'],
-
-    ['1794-09-21', '1793-09-22'],
-    ['1794-09-22', '1794-09-22'],
-    ['1794-09-23', '1794-09-22'],
-
-    ['1795-09-21', '1794-09-22'],
-    ['1795-09-22', '1794-09-22'],
-    ['1795-09-23', '1795-09-23'], // leap year
-  ]
+  const cases: Array<[string, string]> = Array(100)
+    .fill(null)
+    .map((_, i) => 1700 + i)
+    .flatMap(date => [
+      [`${date}-09-21`, `${date - 1}-09-22`],
+      [`${date}-09-22`, `${date}-09-22`],
+      [`${date}-09-23`, `${date}-09-22`]
+    ])
   it.each(cases)('%s -> %s', (str, expected) => {
     expect(getRepOrigin(str).toISOString().split('T')[0]).toEqual(expected)
   })
+
 })
 
 describe('isLeap', () => {
   it.each([
-    [dayjs('1795-09-21'), true],
-    [dayjs('1794-09-21'), false],
-    [dayjs('1793-09-21'), false],
-    [dayjs('1792-09-21'), false],
-    [dayjs('1791-09-21'), true],
+    [1804, true],
+    [1800, false],
+    [1796, true],
+    [1793, false],
+    [1792, true],
+    [1791, false],
   ])('%s is %s', (date, expected) => {
-    expect(isLeapYear(date)).toEqual(expected)
+    expect(isGregLeap(date)).toEqual(expected)
   })
 })

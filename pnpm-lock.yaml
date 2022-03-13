@@ -11,6 +11,7 @@ specifiers:
   concurrently: ^7.0.0
   dayjs: ^1.10.8
   jest: ^27.5.1
+  lodash: ^4.17.21
   postcss: ^8.4.8
   rollup: ^2.3.4
   rollup-plugin-css-only: ^3.1.0
@@ -28,6 +29,7 @@ specifiers:
 
 dependencies:
   dayjs: 1.10.8
+  lodash: 4.17.21
   sirv-cli: 2.0.2
 
 devDependencies:
@@ -2448,7 +2450,6 @@ packages:
 
   /lodash/4.17.21:
     resolution: {integrity: sha512-v2kDEe57lecTulaDIuNTPy3Ry4gLGJ6Z1O3vE1krgXZNrsQ+LFTGHVxVjcXPs17LhbZVGedAJv8XZ1tvj5FvSg==}
-    dev: true
 
   /lru-cache/6.0.0:
     resolution: {integrity: sha512-Jo6dJ04CmSjuznwJSS3pUeWmd/H0ffTlkXXgwZi+eq1UCmqQwCh+eLsYOYCwY991i2Fah4h1BEMCx4qThGbsiA==}

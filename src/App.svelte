@@ -4,63 +4,40 @@
 	import feasts from "./data/feasts.json";
 	import months from "./data/months.json";
 	import saints from "./data/saints.json";
-	let [date, time] = ["1794-01-31", "03:54:04.228Z"]; //new Date().toISOString().split("T");
+	import { toRep } from "./compute";
+	const DEF_TIME = "T00:00:00.001Z";
+	let [date, time] = new Date().toISOString().split("T");
 	export const days = new Array(10).fill(null).map((_, i) => i + 1);
 	export const decades = new Array(3).fill(null).map((_, i) => i);
-	const repOrigin = dayjs("1792-09-22");
-	function toRep(d: string) {
-		return dayjs(d).diff(repOrigin, "days") + 1;
-	}
-	$: repDayNb = toRep(date); // Number of day since the begining of the Republican year
-	$: isFiest = repDayNb > 360;
-	$: repCount = {
-		start: repDayNb,
-		day: repDayNb % 30 || 30,
-		decade: ((repDayNb % 30) - ((repDayNb % 30) % 10)) / 10,
-		month: (repDayNb - (repDayNb % 30)) / 30,
-		season: (repDayNb - (repDayNb % 90)) / 90,
-		year: dayjs(date).get("year") - 1791,
-	};
+	$: year = dayjs(date + DEF_TIME).get("year");
+	$: rep = toRep(date); // Number of day since the begining of the Republican year
+	$: formated = rep.format();
+	$: console.log(formated);
 	function setRep(e: any) {
 		const repDayNb = e.target.id.split("-")[1];
-		const thisYearOrigin = repOrigin.set("year", dayjs(date).get("year"));
-		const isBeforeOrigin = dayjs(date).isBefore(thisYearOrigin);
-		const year = dayjs(date).get("year") + (isBeforeOrigin ? 1 : 0);
-		console.log({
-			thisYearOrigin,
-			date,
-			repOrigin,
-			repDayNb,
-			isBeforeOrigin,
-			year,
-		});
-		date = repOrigin
-			.set("year", dayjs(date).get("year"))
-			.add(repDayNb, "days")
+		date = dayjs(year + "-09-22" + DEF_TIME)
+			.add(repDayNb - 1, "days")
 			.toISOString()
 			.split("T")[0];
+		console.log("Setting date", repDayNb, { date });
 	}
 	function dayCount(day: number, decade: number, monthIndex: number) {
 		return monthIndex * 30 + 10 * decade + day;
 	}
 </script>
 
-<main class=" mx-auto px-4">
-	<h1 class="text-3xl text-center">Calendrier Républicain</h1>
+<main class="mx-auto px-4">
+	<h1 class="text-3xl text-center">Calendrier Républicain Pratique</h1>
 	<div>
 		<label for="date-greg">Date calendrier Grégorien: </label>
 		<input type="date" id="date-greg" bind:value={date} />
 	</div>
 	<div>
 		<label for="date-rep">Date calendrier Républicain: </label>
-		{repDayNb} ###
-		{date} ###
-		{isFiest ? "" : repCount.day}
-		{isFiest ? "" : months[repCount.month]}
-		{isFiest ? feasts[repDayNb - 361] : ""}
-		An {repCount.year} -
-		{seasons[repCount.season]},
-		{repCount.decade + 1} décade
+		{formated.dayPart}
+		An {formated.year} -
+		{formated.season},
+		{formated.decade} décade
 	</div>
 	<table class="w-full table-auto">
 		<thead>
@@ -88,7 +65,7 @@
 								on:click={setRep}
 								class="border-r 
 									{!((mi % 3) - 2) ? 'border-r-black' : ''} 
-									{dayCount(d, de, mi) === repCount.start ? 'bg-blue-400' : ''}
+									{dayCount(d, de, mi) === formated.dayNumber ? 'bg-blue-400' : ''}
 								"
 							>
 								{saints[dayCount(d, de, mi) - 1]}
@@ -112,7 +89,7 @@
 				{#each feasts as f, i}
 					<td
 						class="border 
-						{360 + i + 1 === repCount.start ? 'bg-blue-400' : ''}"
+						{360 + i + 1 === formated.dayNumber ? 'bg-blue-400' : ''}"
 						id="day-{360 + i + 1}"
 						on:click={setRep}>{f}</td
 					>

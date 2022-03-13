@@ -1,0 +1,9 @@
+1792-09-21	{"feast":true,"day":5,"year":0}
+1792-09-22	{"feast":false,"day":30,"month":1,"year":1}
+1792-09-23	{"feast":false,"day":1,"month":1,"year":1}
+1792-09-24	{"feast":false,"day":2,"month":1,"year":1}
+1792-09-25	{"feast":false,"day":3,"month":1,"year":1}
+1792-09-26	{"feast":false,"day":4,"month":1,"year":1}
+1792-09-27	{"feast":false,"day":5,"month":1,"year":1}
+1792-09-28	{"feast":false,"day":6,"month":1,"year":1}
+1792-09-29	{"feast":false,"day":7,"month":1,"year":1}

@@ -1,43 +1,56 @@
 import dayjs from "dayjs";
+import seasons from "./data/seasons.json";
+import feasts from "./data/feasts.json";
+import months from "./data/months.json";
+import saints from "./data/saints.json";
 
-export type RepDate = {
-  feast: false,
-  day: number, //1-30
-  month: number, //1-12
-  year: number,
-} | {
-  feast: true,
-  day: number,
-  year: number
+type Feast = { feast: true, day: number, year: number }
+type NonFeast = { feast: false, day: number, month: number, year: number }
+export type RepDateData = { toString: () => string } & (Feast | NonFeast)
+
+export class RepDate {
+  rep: RepDateData
+  constructor(rep: RepDateData) {
+    this.rep = rep
+  }
+  format() {
+    const { feast, day, year } = this.rep
+    const month = (this.rep as NonFeast).month
+    const dayPart = feast ? feasts[day - 1] : day + ' ' + months[month - 1]
+    const season = feast ? null : seasons[(month - month % 4) / 4]
+    const decade = feast ? null : (day - day % 10) / 10
+    const dayNumber = feast ? 360 + day : (month - 1) * 30 + day
+    return {
+      dayPart,
+      season,
+      decade,
+      dayNumber,
+      ...this.rep,
+    }
+  }
 }
 
-export const isLeapYear = (date: dayjs.Dayjs) => date.get('year') % 4 === 3
+export const isGregLeap = (y: number) => {
+  return y % 4 === 0 && y % 100 !== 0 || y % 400 === 0
+}
 export const getRepOrigin = (str: string) => {
   const date = dayjs(str + 'T00:00:00.001Z')
-  const year = date.get('year')
-  let origin = dayjs(year + '-09-22T00:00:00.001Z')
+  let year = date.get('year')
 
-  const isSame = date.isSame(origin)
-  const isBefore = date.isBefore(origin)
-  if (isSame && isLeapYear(origin)) return origin.subtract(1, 'year')
-  if (isBefore) origin = dayjs((year - 1) + '-09-22T00:00:00.001Z')
-  if (isLeapYear(origin)) origin = origin.add(1, 'day')
-  return origin
+  const toDate = (year: number) => dayjs(`${year}-09-22T00:00:00.001Z`)
+  let origin = toDate(year)
+  return date.isBefore(origin) ? toDate(year - 1) : toDate(year)
 }
 
-const show = (day: dayjs.Dayjs) => day.toISOString().split('T')[0]
 export const toRep = (str: string): RepDate => {
-
   const date = dayjs(str + 'T00:00:00.001Z');
   const origin = getRepOrigin(str);
   const year = origin.get('year') - 1791;
   const dayRep = date.diff(origin, 'day') + 1;
-  const isLeap = isLeapYear(origin)
 
-  console.log({ dayRep, isLeap, origin: show(origin), date: show(date) })
-  if (dayRep > 360) return { feast: true, day: dayRep - 360, year }
+  if (dayRep > 360) return new RepDate({ feast: true, day: dayRep - 360, year })
   const day = dayRep % 30 || 30;
   let month = 1 + (dayRep - (dayRep % 30)) / 30;
   if (month === 13) month = 12
-  return { feast: false, day, month, year }
+  return new RepDate({ feast: false, day, month, year })
 }
