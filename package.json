@@ -4,9 +4,9 @@
   "private": true,
   "scripts": {
     "build:svelt": "rollup -c",
-    "build:tailwind": "npx tailwindcss -i ./public/global.css -o ./public/build/global.css",
+    "build:tailwind": "npx tailwindcss -i ./src/global.css -o ./public/build/global.css",
     "dev:svelt": "rollup -c -w",
-    "dev:tailwind": "pnpx tailwindcss -i ./public/global.css -o ./public/build/global.css --watch",
+    "dev:tailwind": "pnpx tailwindcss -i ./src/global.css -o ./public/build/global.css --watch",
     "dev": "concurrently \"pnpm run dev:svelt\"  \"pnpm run dev:tailwind\"",
     "build": "pnpm run build:svelt && pnpm run build:tailwind",
     "start": "sirv public --no-clear",
