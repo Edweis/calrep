@@ -20,11 +20,12 @@ export class RepDate {
     const season = feast ? null : seasons[(month - month % 4) / 4]
     const decade = feast ? null : (day - day % 10) / 10
     const dayNumber = feast ? 360 + day : (month - 1) * 30 + day
+    const decadeDay = day % 10
     return {
       dayPart,
       season,
       decade,
-      dayNumber,
+      dayNumber, decadeDay,
       ...this.rep,
     }
   }

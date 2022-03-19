@@ -4,18 +4,23 @@
 	import feasts from "./data/feasts.json";
 	import months from "./data/months.json";
 	import saints from "./data/saints.json";
+	import decadeDays from "./data/dayOfDecade.json";
 	import { toRep } from "./compute";
 	import url from "./url";
 	const DEF_TIME = "T00:00:00.001Z";
-	$: urlDate = dayjs(($url as any).hash.replace(/^#\//, "").concat(DEF_TIME));
-	$: dateTime = urlDate.isValid() ? urlDate : dayjs();
-	$: [date, time] = dateTime.toISOString().split("T");
+	const urlDate = dayjs(
+		($url as any).hash.replace(/^#\//, "").concat(DEF_TIME)
+	);
+	const dateTime = urlDate.isValid() ? urlDate : dayjs();
+	const [initDate, initTime] = dateTime.toISOString().split("T");
+	let [date, time] = [initDate, initTime];
 	export const days = new Array(10).fill(null).map((_, i) => i + 1);
 	export const decades = new Array(3).fill(null).map((_, i) => i);
 	$: year = dayjs(date + DEF_TIME).get("year");
 	$: rep = toRep(date); // Number of day since the begining of the Republican year
 	$: formated = rep.format();
 	$: console.log({ date });
+	$: if (!date) date = initDate;
 	function toGreg(d: number) {
 		return dayjs(year + "-09-22" + DEF_TIME)
 			.add(d - 1, "days")
@@ -32,29 +37,17 @@
 </script>
 
 <main class="px-4">
-	<h1 class="text-3xl text-center">Calendrier Républicain Moderne</h1>
-	<div class="container mx-auto p-4">
-		Ce calendrier est inspiré du <a
-			href="https://fr.wikipedia.org/wiki/Calendrier_r%C3%A9publicain"
-			class="underline hover:text-blue-500">calendrier républicain</a
-		>
-		en imposant le premier jour de l'année au 22 Septembre afin de coïncider avec
-		les années bisextiles du calendrier Grégorien. Ainsi ce calendrier
-		<b>ne correspond pas au calendrier républicain de 1791-1805</b> mais représente
-		une version moderne, alternative au calendrier grégorien.
-	</div>
-	<div>
-		<label for="date-greg">Date calendrier Grégorien: </label>
+	<h1 class="text-2xl text-center">Calendrier Républicain Moderne</h1>
+	<div class="container text-center text-2xl mt-2">
 		<input type="date" id="date-greg" bind:value={date} />
 	</div>
-	<div>
-		<label for="date-rep">Date calendrier Républicain: </label>
-		{formated.dayPart}
-		An {formated.year}
+	<p class="container text-center text-xl mt-2">
+		{formated.feast ? "" : decadeDays[formated.decadeDay - 1]}
+		{formated.dayPart}<br />
 		{formated.feast
 			? ""
-			: " - " + formated.season + ", " + (formated.decade + 1) + " décade"}
-	</div>
+			: "décade " + (formated.decade + 1) + ", " + formated.season}, An {formated.year}
+	</p>
 	<table class="w-full table-auto">
 		<thead>
 			<tr class="border-t border-b">
@@ -116,4 +109,14 @@
 			</tr>
 		</tbody>
 	</table>
+	<div class="container mx-auto p-4">
+		Ce calendrier est inspiré du <a
+			href="https://fr.wikipedia.org/wiki/Calendrier_r%C3%A9publicain"
+			class="underline hover:text-blue-500">calendrier républicain</a
+		>
+		en imposant le premier jour de l'année au 22 Septembre afin de coïncider avec
+		les années bisextiles du calendrier Grégorien. Ainsi ce calendrier
+		<b>ne correspond pas au calendrier républicain de 1791-1805</b> mais représente
+		une version moderne, alternative au calendrier grégorien.
+	</div>
 </main>
