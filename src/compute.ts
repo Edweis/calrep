@@ -21,11 +21,12 @@ export class RepDate {
     const decade = feast ? null : (day - mod(day, 10)) / 10
     const dayNumber = feast ? 360 + day : (month - 1) * 30 + day
     const decadeDay = mod(day, 10)
+    const isLeap = isGregLeap(year)
     return {
       dayPart,
       season,
       decade,
-      dayNumber, decadeDay, month,
+      dayNumber, decadeDay, month, isLeap,
       ...this.rep,
     }
   }
