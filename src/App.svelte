@@ -26,12 +26,12 @@
 	};
 </script>
 
-<main class="px-4">
+<main class="max-w-[640px] ssssm:container mx-auto px-4 pb-4">
 	<h1 class="text-2xl text-center">Calendrier Républicain Moderne</h1>
-	<div class="container text-center text-2xl mt-2">
+	<div class="text-center text-2xl mt-2">
 		<input type="date" id="date-greg" bind:value={inputDate} />
 	</div>
-	<p class="container text-center text-xl mt-2">
+	<p class="text-center text-xl mt-2">
 		{formated.feast ? "" : decadeDays[formated.decadeDay - 1]}
 		{formated.dayPart}<br />
 		{formated.feast
@@ -93,8 +93,8 @@
 		>
 			&lt; {formated.month === 0 ? "fêtes" : months[(formated.month || 12) - 1]}
 		</a>
+		<a href="/">Aujourd'hui</a>
 		<a
-			data-month={formated.month}
 			href="/#/{formated.month === 11
 				? moveBy(30 - formated.day + 1)
 				: moveBy(30)}"
@@ -104,7 +104,8 @@
 		</a>
 	</div>
 
-	<div class="bottom-0 absolute pr-4 pb-4 text-justify">
+	<hr class="my-10" />
+	<div class="max-w-[640px] text-justify">
 		Ce calendrier est inspiré du <a
 			href="https://fr.wikipedia.org/wiki/Calendrier_r%C3%A9publicain"
 			class="underline hover:text-blue-500">calendrier républicain</a
