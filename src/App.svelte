@@ -8,32 +8,20 @@
 	import { toRep } from "./compute";
 	import url from "./url";
 	const DEF_TIME = "T00:00:00.001Z";
-	const urlDate = dayjs(
-		($url as any).hash.replace(/^#\//, "").concat(DEF_TIME)
-	);
-	const dateTime = urlDate.isValid() ? urlDate : dayjs();
-	const [initDate, initTime] = dateTime.toISOString().split("T");
-	let [date, time] = [initDate, initTime];
 	export const days = new Array(10).fill(null).map((_, i) => i + 1);
 	export const decades = new Array(3).fill(null).map((_, i) => i);
+
+	$: urlDate = dayjs(($url as any).hash.replace(/^#\//, "").concat(DEF_TIME));
+	$: dateTime = urlDate.isValid() ? urlDate : dayjs();
+	$: [date, time] = dateTime.toISOString().split("T");
 	$: year = dayjs(date + DEF_TIME).get("year");
 	$: rep = toRep(date); // Number of day since the begining of the Republican year
 	$: formated = rep.format();
 	$: console.log({ date });
-	$: if (!date) date = initDate;
-	function toGreg(d: number) {
-		return dayjs(year + "-09-22" + DEF_TIME)
-			.add(d - 1, "days")
-			.toISOString()
-			.split("T")[0];
-	}
-	function setGreg(e: any) {
-		const repDayNb = e.target.id.split("-")[1];
-		date = toGreg(repDayNb);
-	}
-	function dayCount(day: number, decade: number, monthIndex: number) {
-		return monthIndex * 30 + 10 * decade + day;
-	}
+	$: moveBy = (d: number) => {
+		const now = dayjs(date + DEF_TIME);
+		return now.add(d, "days").toISOString().split("T")[0];
+	};
 </script>
 
 <main class="px-4">
@@ -41,6 +29,8 @@
 	<div class="container text-center text-2xl mt-2">
 		<input type="date" id="date-greg" bind:value={date} />
 	</div>
+	<p>{JSON.stringify(formated, null, "  ")}</p>
+	<p>{formated.decade}/{formated.decadeDay}</p>
 	<p class="container text-center text-xl mt-2">
 		{formated.feast ? "" : decadeDays[formated.decadeDay - 1]}
 		{formated.dayPart}<br />
@@ -48,7 +38,49 @@
 			? ""
 			: "décade " + (formated.decade + 1) + ", " + formated.season}, An {formated.year}
 	</p>
-	<table class="w-full table-auto">
+	<table class="w-full mt-4">
+		<thead>
+			<tr><th /><th colspan="3">{months[formated.month]}</th></tr>
+			<tr>
+				<th class="w-1" />
+				{#each decades as de}<th>Décade {de + 1}</th>{/each}
+			</tr>
+		</thead>
+		{#if !rep.rep.feast}
+			<tbody>
+				{#each days as d}
+					<tr>
+						<td class="text-right">{decadeDays[d - 1]}</td>
+						{#each decades as de}
+							<td
+								class="text-center 
+								{de === formated.decade && d === formated.decadeDay && 'bg-blue-500'}"
+							>
+								<a
+									href="/#/{moveBy(
+										de * 10 + d - formated.decade * 10 - formated.decadeDay
+									)}"
+									class="w-full block"
+								>
+									{saints[formated.month * 30 + de * 10 + d - 1]}
+								</a>
+							</td>
+						{/each}
+					</tr>
+				{/each}
+			</tbody>
+		{/if}
+	</table>
+	<div class="flex justify-between underline mt-3">
+		<a
+			href="/#/{formated.month === 0 ? moveBy(-formated.day) : moveBy(-30)}"
+			class="block"
+			>&lt; {formated.month === 0 ? "fêtes" : months[formated.month - 1]}</a
+		>
+		<a href="/#/{moveBy(30)}" class="block">{months[formated.month + 1]} &gt;</a
+		>
+	</div>
+	<!-- <table class="hidden w-full table-auto">
 		<thead>
 			<tr class="border-t border-b">
 				<th class="border-r border-l" scope="col" />
@@ -86,7 +118,7 @@
 			</tbody>
 		{/each}
 	</table>
-	<table class="mt-3">
+	<table class="hidden mt-3">
 		<thead>
 			<tr>
 				{#each feasts as _, i}
@@ -108,7 +140,7 @@
 				{/each}
 			</tr>
 		</tbody>
-	</table>
+	</table> -->
 	<div class="container mx-auto p-4">
 		Ce calendrier est inspiré du <a
 			href="https://fr.wikipedia.org/wiki/Calendrier_r%C3%A9publicain"

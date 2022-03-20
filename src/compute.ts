@@ -7,7 +7,7 @@ import saints from "./data/saints.json";
 type Feast = { feast: true, day: number, year: number }
 type NonFeast = { feast: false, day: number, month: number, year: number }
 export type RepDateData = { toString: () => string } & (Feast | NonFeast)
-
+export const mod = (a: number, b: number) => (a - 1) % b + 1
 export class RepDate {
   rep: RepDateData
   constructor(rep: RepDateData) {
@@ -16,16 +16,16 @@ export class RepDate {
   format() {
     const { feast, day, year } = this.rep
     const month = (this.rep as NonFeast).month
-    const dayPart = feast ? feasts[day - 1] : day + ' ' + months[month - 1]
+    const dayPart = feast ? feasts[day - 1] : day + ' ' + months[month]
     const season = feast ? null : seasons[(month - month % 4) / 4]
-    const decade = feast ? null : (day - day % 10) / 10
+    const decade = feast ? null : (day - mod(day, 10)) / 10
     const dayNumber = feast ? 360 + day : (month - 1) * 30 + day
-    const decadeDay = day % 10
+    const decadeDay = mod(day, 10)
     return {
       dayPart,
       season,
       decade,
-      dayNumber, decadeDay,
+      dayNumber, decadeDay, month,
       ...this.rep,
     }
   }
@@ -51,7 +51,6 @@ export const toRep = (str: string): RepDate => {
 
   if (dayRep > 360) return new RepDate({ feast: true, day: dayRep - 360, year })
   const day = dayRep % 30 || 30;
-  let month = 1 + (dayRep - (dayRep % 30)) / 30;
-  if (month === 13) month = 12
+  let month = (dayRep - mod(dayRep, 30)) / 30;
   return new RepDate({ feast: false, day, month, year })
 }

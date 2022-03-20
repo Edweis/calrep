@@ -1,5 +1,5 @@
 import dayjs from "dayjs"
-import { getRepOrigin, isGregLeap, RepDate, RepDateData, toRep } from "./compute"
+import { getRepOrigin, isGregLeap, mod, RepDate, RepDateData, toRep } from "./compute"
 import groupBy from 'lodash/groupBy'
 
 describe('toRep', () => {
@@ -42,4 +42,15 @@ describe('isLeap', () => {
   ])('%s is %s', (date, expected) => {
     expect(isGregLeap(date)).toEqual(expected)
   })
+})
+
+
+describe('mod', () => {
+  it.each([
+    [1, 10, 1],
+    [4, 10, 4],
+    [9, 10, 9],
+    [10, 10, 10],
+    [11, 10, 1],
+  ])('%s mod %s === %s', (a, b, expected) => expect(mod(a, b,)).toEqual(expected))
 })
